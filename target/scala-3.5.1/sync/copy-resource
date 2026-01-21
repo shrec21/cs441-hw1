@@ -1,0 +1,1 @@
+[[{"${BASE}/src/main/resources/application.conf":["${BASE}/target/scala-3.5.1/classes/application.conf"]},{"${BASE}/target/scala-3.5.1/classes/application.conf":["${BASE}/src/main/resources/application.conf"]}],{"${BASE}/src/main/resources/application.conf":{"file":"file:///Users/Lenovo/cs441-hw1/src/main/resources/application.conf","lastModified":1769018583349}}]
