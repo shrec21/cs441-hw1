@@ -99,8 +99,25 @@ import org.slf4j.LoggerFactory
     log.info(s"[$totalDocs/${pdfs.size}] Extracting text: $docId")
     val text = PdfTextExtractor.extractText(pdf)
 
-    val chunks: Vector[String] = Chunker.split(text, maxChars, overlap)
-    log.info(s"[$totalDocs/${pdfs.size}] Chunked into ${chunks.size} chunks")
+    val rawChunks: Vector[String] = Chunker.split(text, maxChars, overlap)
+
+    def looksLikeReferences(s: String): Boolean =
+      val t = s.toLowerCase
+      t.contains("references") ||
+      t.contains("bibliography") ||
+      t.count(_ == '[') >= 8 ||              // many [1] [2] citations
+      t.contains("proceedings") && t.contains("acm") ||
+      t.contains("pp.") && t.contains("conference")
+
+    def looksLikeGarbage(s: String): Boolean =
+      val t = s.trim
+      t.length < 200 ||                      // too small to be useful
+      t.count(_.isLetter).toDouble / t.length < 0.3 // mostly non-letters
+
+    val chunks: Vector[String] =
+      rawChunks.filterNot(c => looksLikeReferences(c) || looksLikeGarbage(c))
+
+    log.info(s"[$totalDocs/${pdfs.size}] Chunked into ${rawChunks.size} chunks, kept ${chunks.size} after filtering")
     totalChunks += chunks.size
 
     // Initialize Lucene indexer once (lock vector dimension)
@@ -155,22 +172,41 @@ import org.slf4j.LoggerFactory
   val queryText = "How do they estimate development effort in OpenStack?"
   val qVec: Vector[Float] = client.embed(Vector(queryText), embedModel).head
 
-  val results = LuceneSearcher.search(indexDir, qVec, topK = 5)
-  val context = ContextPacker.pack(results, topK = 3, maxCharsPerChunk = 500)
+  val results = LuceneSearcher.search(indexDir, qVec, topK = 25)
+  
+  log.info(s"Retrieved ${results.size} results from search")
+  if results.nonEmpty then
+    log.info(s"Top result score: ${results.head._1}, doc: ${results.head._2}, chunk: ${results.head._3}")
+    log.info(s"Top result text preview: ${results.head._4.take(200)}...")
+  
+  val context = ContextPacker.pack(results, topK = 6, maxCharsPerChunk = 700)
 
   println("\n====== RAG CONTEXT BLOCK ======\n")
-  println(context)
+  if context.trim.isEmpty then
+    println("WARNING: Context is empty! No chunks were retrieved.")
+  else
+    println(context)
   println("\n===============================\n")
 
   val systemPrompt =
-    """You are an AI assistant.
-      |Answer the question using ONLY the provided context.
-      |If the answer is not contained in the context, say "I don't know."
+    """You are a helpful AI assistant that answers questions based on the provided context.
+      |Use the context information to answer the question as thoroughly as possible.
+      |If the context contains relevant information, use it to provide a detailed answer.
+      |If the context does not contain enough information to fully answer the question, 
+      |you can say what information is available and note any limitations.
+      |Only say "I don't know" if the context is completely irrelevant or empty.
       |""".stripMargin
 
   val messages = Vector(
     ChatMessage("system", systemPrompt),
-    ChatMessage("user", s"Context:\n$context\n\nQuestion:\n$queryText")
+    ChatMessage("user", s"""Based on the following context from research papers, please answer the question.
+
+Context:
+$context
+
+Question: $queryText
+
+Please provide a detailed answer based on the context above.""")
   )
 
   log.info(s"Asking chat model: $chatModel")
