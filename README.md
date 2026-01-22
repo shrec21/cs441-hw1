@@ -52,12 +52,15 @@ Corpus Statistics
  ↓
 Vector Index (HNSW / Lucene)
 
-****Tech Stack****
+---
 
-Scala — Core language
+## 🛠️ Tech Stack
 
-Ollama — Local embedding models
+- **Language:** Scala   
+- **Build Tool:** sbt  
+- **Embeddings:** Ollama (local LLM embedding models)  
+- **Vector Indexing:** Lucene (HNSW)  
+- **Data Sources:** Research PDFs  
+- **Deployment (Optional):** AWS (EMR)  
+- **Version Control:** Git & GitHub
 
-sbt — Build tool
-
-Lucene (HNSW) — Vector indexing (next stage)
