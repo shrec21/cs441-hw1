@@ -51,16 +51,15 @@ Embedding Generation
 Corpus Statistics
  ↓
 Vector Index (HNSW / Lucene)
-
+```
 ---
 
-## 🛠️ Tech Stack
-
-- **Language:** Scala   
-- **Build Tool:** sbt  
-- **Embeddings:** Ollama (local LLM embedding models)  
-- **Vector Indexing:** Lucene (HNSW)  
-- **Data Sources:** Research PDFs  
-- **Deployment (Optional):** AWS (EMR)  
-- **Version Control:** Git & GitHub
+ ## 🛠️ Tech Stack
+ 
+ - **Language:** Scala   
+ - **Build Tool:** sbt  
+ - **Embeddings:** Ollama (local LLM embedding models)  
+ - **Vector Indexing:** Lucene (HNSW)  
+ - **Data Sources:** Research PDFs  
+ - **Version Control:** Git & GitHub
 
