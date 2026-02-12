@@ -1,4 +1,4 @@
-# 🔍 Distributed RAG Index Builder (Scala + Spark)
+# 🔍 Distributed RAG Index Builder
 
 A scalable **Retrieval-Augmented Generation (RAG) index builder** designed to process large collections of research PDFs, chunk text intelligently, compute embeddings, and prepare data for efficient semantic search using vector indexes.
 
